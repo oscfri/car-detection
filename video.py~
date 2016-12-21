@@ -1,0 +1,75 @@
+import numpy as np
+import cv2
+from random import randint
+from keras.models import load_model
+import load_images
+import filtFuncs as f                                                         
+import time
+# load model
+model = load_model("car_model.h5")
+# load video
+cap = cv2.VideoCapture('../DrivingaroundDublinCityDashcam.mp4')
+
+# Set number of particles
+nPart = 100
+# Points that the particle images will be normalized to
+pts2 = np.float32([[0,0],[63,0],[0,63],[63,63]])
+
+# Capture first frame                                                               \
+                                                                                         
+ret, frame = cap.read()
+# Our operations on the frame come here                                                                                                                                          
+height, width, channels = frame.shape
+
+# generate x, y coordinates for the particles                                           
+x = [randint(33,(height-33)) for p in range(1,nPart)]
+y = [randint(33,(width-33)) for p in range(1,nPart)]
+
+
+while(True):
+    # Capture frame-by-frame                                                                                       
+    ret, frame = cap.read()
+    # Our operations on the frame come here                                                                                                                                        
+    
+    #convert image to gray scale
+    gray_image = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    weights =[]
+    
+    for i in range(0,nPart-1):
+        extra_area = 200
+        xl = x[i]-extra_area
+        xr = x[i]+extra_area
+        yd = y[i]-extra_area
+        yu = y[i]+extra_area
+
+        pts1 = np.float32([[xl,yd],[xr,yd],[xl,yu],[xr,yu]])
+        M = cv2.getPerspectiveTransform(pts1,pts2)
+        
+        dst = cv2.warpPerspective(gray_image,M,(64,64))
+        
+        
+        scale = model.predict_proba(dst.reshape((1,64,64,1)))
+        weights.append(scale)
+
+        # do not know why x and y are switched but
+        cv2.circle(frame,(int(y[i]),int(x[i])), 2, (0,0,255), -1)
+    
+    # Display the resulting frame
+    cv2.imshow('frame',frame)
+    
+    sumW = sum(weights)
+    weights[:] = [i/sumW for i in weights]
+    sampleInds = f.systematic_resample(weights)
+    
+    print sampleInds
+    x = [x[i] for i in sampleInds]
+    y = [y[i] for i in sampleInds]
+    print x
+
+    x,y = f.predict(x,y,10)
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+# When everything done, release the capture                                                                        
+cap.release()
+cv2.destroyAllWindows()
