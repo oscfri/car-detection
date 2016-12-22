@@ -26,23 +26,32 @@ height, width, channels = frame.shape
 #extra_area determines how large of a square we will have around the particle, and extra_area of 100 would make a 200 by 200 square
 extra_area = 100
 # generate x, y coordinates for the particles                                           
-x = [randint(extra_area,(height-extra_area)) for p in range(1,nPart)]
-y = [randint(extra_area,(width-extra_area)) for p in range(1,nPart)]
+x = [randint(extra_area,(height-extra_area)) for p in range(nPart)]
+y = [randint(extra_area,(width-extra_area)) for p in range(nPart)]
 
 
 #R is the amount of noise in the predict step
 R = 10
 
+#frame_skip is the number of frames we skip in the beginning
+frame_index = 0
+frame_skip = 240
+
 while(True):
+    frame_index += 1
     # Capture frame-by-frame                                                                                       
     ret, frame = cap.read()
-    # Our operations on the frame come here                                                                                                                                        
+    if frame_index < frame_skip:
+        continue
+
+    # Our operations on the frame come here
     
     #convert image to gray scale
     gray_image = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     weights =[]
+    windows = np.zeros((nPart, 64, 64, 1))
     
-    for i in range(0,nPart-1):
+    for i in range(nPart):
         #calucalte the coordinates of a square with the particle at the center
         
         xl = x[i]-extra_area
@@ -55,20 +64,26 @@ while(True):
         M = cv2.getPerspectiveTransform(pts1,pts2)
         dst = cv2.warpPerspective(gray_image,M,(64,64))
         
+        # Store the current window
+        windows[i, :, :, :] = dst.reshape((64, 64, 1))
+
         #calculate the weights, I don't think this is right
-        scale = model.predict_proba(dst.reshape((1,64,64,1)))
-        weights.append(scale)
+        #scale = model.predict_proba(dst.reshape((1,64,64,1)))
+        #weights.append(scale)
 
         # do not know why x and y are switched but it seems like they are in
         # the right places in the video
-        cv2.circle(frame,(int(y[i]),int(x[i])), 2, (0,0,255), -1)
+        cv2.circle(frame,(int(x[i]),int(y[i])), 2, (0,0,255), -1)
+
+    # Calculate all weights in one go
+    weights = model.predict_proba(windows)
+    print weights
     
     # Display the resulting frame
     cv2.imshow('frame',frame)
     
     #normalize the weights
-    sumW = sum(weights)
-    weights[:] = [i/sumW for i in weights]
+    weights = weights / sum(weights)
     #resample
     sampleInds = f.systematic_resample(weights)
     

@@ -3,10 +3,12 @@ from numpy import *
 from numpy.random import *
 
 def systematic_resample(weights):
-  n = len(weights)
+  n = weights.shape[0]
   w = 1./n
   indices = []
-  C = [0.] + [sum(weights[:i+1]) for i in range(n)]
+  C = [0.0]
+  for i in range(n):
+      C.append(C[i] + weights[i])
   j = 0
   u0 = random()*w
   for u in range(n):
