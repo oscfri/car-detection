@@ -9,10 +9,10 @@ import time
 # load model
 model = load_model("car_model.h5")
 # load video
-cap = cv2.VideoCapture('../DrivingaroundDublinCityDashcam.mp4')
+cap = cv2.VideoCapture('../road.mp4')
 
 # Set number of particles
-nPart = 100
+nPart = 200
 # Points that the particle images will be normalized to
 pts2 = np.float32([[0,0],[63,0],[0,63],[63,63]])
 
@@ -24,18 +24,18 @@ height, width, channels = frame.shape
 
 
 #extra_area determines how large of a square we will have around the particle, and extra_area of 100 would make a 200 by 200 square
-extra_area = 100
+extra_area = 30
 # generate x, y coordinates for the particles                                           
-x = [randint(extra_area,(height-extra_area)) for p in range(nPart)]
-y = [randint(extra_area,(width-extra_area)) for p in range(nPart)]
+y = [randint(extra_area,(height-extra_area)) for p in range(nPart)]
+x = [randint(extra_area,(width-extra_area)) for p in range(nPart)]
 
 
 #R is the amount of noise in the predict step
-R = 10
+R = 4
 
 #frame_skip is the number of frames we skip in the beginning
 frame_index = 0
-frame_skip = 240
+frame_skip = 0
 
 while(True):
     frame_index += 1
@@ -77,11 +77,13 @@ while(True):
 
     # Calculate all weights in one go
     weights = model.predict_proba(windows)
+    
     print weights
     
     # Display the resulting frame
+    cv2.imshow('window',windows[0,:,:,:])
     cv2.imshow('frame',frame)
-    
+    #cv2.imshow('frame',windows[nPart-1, :, :, :])
     #normalize the weights
     weights = weights / sum(weights)
     #resample
