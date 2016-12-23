@@ -46,9 +46,9 @@ while(True):
     # Our operations on the frame come here
     
     #convert image to gray scale
-    gray_image = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    #gray_image = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     weights = np.ones((nPart, 1))
-    windows = np.zeros((nPart, 64, 64, 1))
+    windows = np.zeros((nPart, 64, 64, 3))
     
     for i in range(nPart):
         #calucalte the coordinates of a square with the particle at the center
@@ -61,24 +61,28 @@ while(True):
         #transform this square to 64x64
         pts1 = np.float32([[xl,yd],[xr,yd],[xl,yu],[xr,yu]])
         M = cv2.getPerspectiveTransform(pts1,pts2)
-        dst = cv2.warpPerspective(gray_image,M,(64,64))
+        dst = cv2.warpPerspective(frame,M,(64,64))
         
         # Store the current window
-        windows[i, :, :, :] = dst.reshape((64, 64, 1)) / 255.0
+        windows[i, :, :, :] = dst.reshape((64, 64, 3)) / 255.0
 
         #calculate the weights, I don't think this is right
         #scale = model.predict_proba(dst.reshape((1,64,64,1)))
         #weights.append(scale)
 
-        # do not know why x and y are switched but it seems like they are in
-        # the right places in the video
-        cv2.circle(frame,(int(x[i]),int(y[i])), 2, (0,0,255), -1)
 
     # Calculate all weights in one go
-    weights = model.predict_proba(windows)
+    weights = model.predict(windows)
+
+    for i, weight in enumerate(weights):
+        # do not know why x and y are switched but it seems like they are in
+        # the right places in the video
+        cv2.rectangle(frame,(int(y[i] - extra_area),int(x[i] - extra_area)),
+                      (int(y[i] + extra_area), int(x[i] + extra_area)),
+                      (0,0, int(weight * 255)), 1)
+
     
     # Display the resulting frame
-    cv2.imshow('window',windows[0,:,:,:])
     cv2.imshow('frame',frame)
     #cv2.imshow('frame',windows[nPart-1, :, :, :])
     #normalize the weights

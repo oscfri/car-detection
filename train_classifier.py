@@ -9,19 +9,18 @@ import load_images
 
 def build_model():
     model = Sequential()
-    model.add(Convolution2D(3, 3, 3, input_shape=(64, 64, 1)))
+    model.add(Convolution2D(3, 3, 3, input_shape=(64, 64, 3)))
     model.add(BatchNormalization())
-    model.add(Convolution2D(3, 3, 3))
-    model.add(BatchNormalization())
-
     model.add(MaxPooling2D())
 
     model.add(Convolution2D(3, 3, 3))
     model.add(BatchNormalization())
     model.add(Convolution2D(3, 3, 3))
     model.add(BatchNormalization())
-
     model.add(MaxPooling2D())
+
+    model.add(Convolution2D(3, 3, 3))
+    model.add(BatchNormalization())
     model.add(Convolution2D(3, 3, 3))
     model.add(BatchNormalization())
 
@@ -38,10 +37,11 @@ if __name__ == "__main__":
     images, target = load_images.load("train")
     datagen = ImageDataGenerator(horizontal_flip=True,
                                  rotation_range=10,
-                                 shear_range=1,
-                                 zoom_range=0.2)
+                                 shear_range=0.5,
+                                 zoom_range=0.1,
+                                 channel_shift_range=0.05)
     datagen.fit(images)
     model.fit_generator(datagen.flow(images, target),
                         samples_per_epoch=len(images),
-                        nb_epoch=20)
+                        nb_epoch=10)
     model.save("car_model.h5")
