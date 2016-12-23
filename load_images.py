@@ -11,8 +11,9 @@ if data_folder is None:
 
 def load_image(image_name):
     full_path = os.path.join(data_folder, image_name)
-    image = cv2.imread(full_path, cv2.IMREAD_GRAYSCALE)
-    return image[:, :, np.newaxis]
+    image = cv2.imread(full_path, cv2.IMREAD_GRAYSCALE) / 255.0
+    scaled_image = cv2.resize(image, (64, 64))
+    return scaled_image[:, :, np.newaxis]
 
 def load(origin):
     train_files = open(origin, "r")

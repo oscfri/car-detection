@@ -20,8 +20,7 @@ pts2 = np.float32([[0,0],[63,0],[0,63],[63,63]])
                                                                                          
 ret, frame = cap.read()
 # Our operations on the frame come here                                                                                                                                          
-height, width, channels = frame.shape
-
+width, height, channels = frame.shape
 
 #extra_area determines how large of a square we will have around the particle, and extra_area of 100 would make a 200 by 200 square
 extra_area = 100
@@ -48,7 +47,7 @@ while(True):
     
     #convert image to gray scale
     gray_image = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    weights =[]
+    weights = np.ones((nPart, 1))
     windows = np.zeros((nPart, 64, 64, 1))
     
     for i in range(nPart):
@@ -65,7 +64,7 @@ while(True):
         dst = cv2.warpPerspective(gray_image,M,(64,64))
         
         # Store the current window
-        windows[i, :, :, :] = dst.reshape((64, 64, 1))
+        windows[i, :, :, :] = dst.reshape((64, 64, 1)) / 255.0
 
         #calculate the weights, I don't think this is right
         #scale = model.predict_proba(dst.reshape((1,64,64,1)))
@@ -76,8 +75,7 @@ while(True):
         cv2.circle(frame,(int(x[i]),int(y[i])), 2, (0,0,255), -1)
 
     # Calculate all weights in one go
-    weights = model.predict_proba(windows)
-    print weights
+    weights = model.predict(windows)
     
     # Display the resulting frame
     cv2.imshow('frame',frame)

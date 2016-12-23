@@ -8,7 +8,7 @@ if data_folder is None:
     sys.exit()
 
 def write(train_file, test_file, string):
-    if random.random() > 0.5:
+    if random.random() > 0.2:
         train_file.write(string + "\n")
     else:
         test_file.write(string + "\n")
@@ -19,20 +19,21 @@ if __name__ == "__main__":
 
     non_vehicles_folder = os.path.join(data_folder, 'non-vehicles')
     vehicles_folder = os.path.join(data_folder, 'vehicles')
-    orientations = [
-        'Far',
-        'Left',
-        'MiddleClose',
-        'Right',
+    subfolders = [
+        'non-vehicles/Far',
+        'non-vehicles/Left',
+        'non-vehicles/MiddleClose',
+        'non-vehicles/Right',
+        'vehicles/Far',
+        'vehicles/Left',
+        'vehicles/MiddleClose',
+        'vehicles/Right',
+        'vehicles/cars128x128',
     ]
 
-    for orientation in orientations:
-        non_vehicles_subfolder = os.path.join(non_vehicles_folder, orientation)
-        vehicles_subfolder = os.path.join(vehicles_folder, orientation)
-        for image in os.listdir(non_vehicles_subfolder):
-            write(train_file, test_file, 'non-vehicles/%s/%s' % (orientation, image))
-        for image in os.listdir(vehicles_subfolder):
-            write(train_file, test_file, 'vehicles/%s/%s' % (orientation, image))
+    for subfolder in subfolders:
+        for image in os.listdir(os.path.join(data_folder, subfolder)):
+            write(train_file, test_file, '%s/%s' % (subfolder, image))
 
     train_file.close()
     test_file.close()
