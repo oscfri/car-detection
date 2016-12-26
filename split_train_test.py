@@ -17,6 +17,12 @@ if __name__ == "__main__":
     train_file = open("train", "w")
     test_file = open("test", "w")
 
+    """
+    annotations_folder = os.path.join(data_folder, 'Annotations/Anno_XML')
+    for annotation in os.listdir(annotations_folder):
+        write(train_file, test_file, annotation)
+"""
+
     non_vehicles_folder = os.path.join(data_folder, 'non-vehicles')
     vehicles_folder = os.path.join(data_folder, 'vehicles')
     subfolders = [
@@ -24,12 +30,12 @@ if __name__ == "__main__":
         'non-vehicles/Left',
         'non-vehicles/MiddleClose',
         'non-vehicles/Right',
-        'non-vehicles/Set1Part1',
+        #'non-vehicles/Set1Part1',
         'vehicles/Far',
         'vehicles/Left',
         'vehicles/MiddleClose',
         'vehicles/Right',
-        'vehicles/cars128x128',
+        #'vehicles/cars128x128',
     ]
 
     for subfolder in subfolders:

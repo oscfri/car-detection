@@ -12,25 +12,24 @@ model = load_model("car_model.h5")
 cap = cv2.VideoCapture('../road.mp4')
 
 # Set number of particles
-nPart = 200
+nPart = 100
 # Points that the particle images will be normalized to
 pts2 = np.float32([[0,0],[63,0],[0,63],[63,63]])
 
 # Capture first frame                                                               \
                                                                                          
 ret, frame = cap.read()
-# Our operations on the frame come here                                                                                                                                          
-width, height, channels = frame.shape
+# Our operations on the frame come here
+height, width, channels = frame.shape
 
 #extra_area determines how large of a square we will have around the particle, and extra_area of 100 would make a 200 by 200 square
 extra_area = 30
 # generate x, y coordinates for the particles                                           
-y = [randint(extra_area,(height-extra_area)) for p in range(nPart)]
-x = [randint(extra_area,(width-extra_area)) for p in range(nPart)]
-
+x = np.random.randint(extra_area,width-extra_area, size=nPart)
+y = np.random.randint(extra_area,height-extra_area, size=nPart)
 
 #R is the amount of noise in the predict step
-R = 4
+R = 60
 
 #frame_skip is the number of frames we skip in the beginning
 frame_index = 0
@@ -64,7 +63,7 @@ while(True):
         dst = cv2.warpPerspective(frame,M,(64,64))
         
         # Store the current window
-        windows[i, :, :, :] = dst.reshape((64, 64, 3)) / 255.0
+        windows[i, :, :, :] = dst[:64, :64, :] / 255.0
 
         #calculate the weights, I don't think this is right
         #scale = model.predict_proba(dst.reshape((1,64,64,1)))
@@ -77,8 +76,8 @@ while(True):
     for i, weight in enumerate(weights):
         # do not know why x and y are switched but it seems like they are in
         # the right places in the video
-        cv2.rectangle(frame,(int(y[i] - extra_area),int(x[i] - extra_area)),
-                      (int(y[i] + extra_area), int(x[i] + extra_area)),
+        cv2.rectangle(frame,(int(x[i] - extra_area),int(y[i] - extra_area)),
+                      (int(x[i] + extra_area), int(y[i] + extra_area)),
                       (0,0, int(weight * 255)), 1)
 
     
@@ -91,11 +90,15 @@ while(True):
     sampleInds = f.systematic_resample(weights)
     
     #update particles
-    x = [x[i] for i in sampleInds]
-    y = [y[i] for i in sampleInds]
+    x = np.asarray([x[i] for i in sampleInds])
+    y = np.asarray([y[i] for i in sampleInds])
     
     #predict step, only movement now is noise
     x,y = f.predict(x,y,R)
+
+    x = np.clip(x, extra_area, width - extra_area)
+    y = np.clip(y, extra_area, height - extra_area)
+    
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 

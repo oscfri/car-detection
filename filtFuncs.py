@@ -18,7 +18,7 @@ def systematic_resample(weights):
   return indices
 
 def predict(x,y,R):
-  n = len(x)
-  x = add(x,[(1-2*random())*R for i in range(n)])
-  y = add(y,[(1-2*random())*R for i in range(n)])
+  n = x.shape[0]
+  x = (x + (1 - 2 * random(n)) * R).astype(int)
+  y = (y + (1 - 2 * random(n)) * R).astype(int)
   return x,y
