@@ -22,3 +22,18 @@ def predict(x,y,R):
   x = (x + (1 - 2 * random(n)) * R).astype(int)
   y = (y + (1 - 2 * random(n)) * R).astype(int)
   return x,y
+
+def multinomial_resample(weights,num):
+  n = weights.shape[0]
+  w = 1./n
+  indices = []
+  C = [0.0]
+  for i in range(n):
+      C.append(C[i] + weights[i])
+  for u in range(num):
+    j=0
+    u0 = random()
+    while u0 > C[j]:
+      j+=1
+    indices.append(j-1)
+  return indices
