@@ -19,6 +19,12 @@ def build_model():
     model.add(BatchNormalization())
     model.add(Convolution2D(3, 3, 3))
     model.add(BatchNormalization())
+    model.add(MaxPooling2D())
+
+    model.add(Convolution2D(3, 3, 3))
+    model.add(BatchNormalization())
+    model.add(Convolution2D(3, 3, 3))
+    model.add(BatchNormalization())
 
     model.add(Flatten())
     model.add(Dense(10))
