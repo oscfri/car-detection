@@ -11,6 +11,8 @@ def build_model():
     model = Sequential()
     model.add(Convolution2D(3, 3, 3, input_shape=(64, 64, 3)))
     model.add(BatchNormalization())
+    model.add(Convolution2D(3, 3, 3))
+    model.add(BatchNormalization())
     model.add(MaxPooling2D())
 
     model.add(Convolution2D(3, 3, 3))
@@ -19,6 +21,8 @@ def build_model():
     model.add(BatchNormalization())
 
     model.add(Flatten())
+    model.add(Dense(10))
+    model.add(Dense(5))
     model.add(Dense(1))
     model.add(Activation('sigmoid'))
 

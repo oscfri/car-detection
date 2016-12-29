@@ -12,7 +12,7 @@ model = load_model("car_model.h5")
 cap = cv2.VideoCapture('../road.mp4')
 
 # Set number of particles
-nPart = 100
+nPart = 50
 # Points that the particle images will be normalized to
 pts2 = np.float32([[0,0],[63,0],[0,63],[63,63]])
 
@@ -23,13 +23,14 @@ ret, frame = cap.read()
 height, width, channels = frame.shape
 
 #extra_area determines how large of a square we will have around the particle, and extra_area of 100 would make a 200 by 200 square
-extra_area = 30
+extra_area = 10
 # generate x, y coordinates for the particles                                           
+w = np.random.randint(10,32, size=nPart)
 x = np.random.randint(extra_area,width-extra_area, size=nPart)
 y = np.random.randint(extra_area,height-extra_area, size=nPart)
 
 #R is the amount of noise in the predict step
-R = 60
+R = 40
 
 #frame_skip is the number of frames we skip in the beginning
 frame_index = 0
@@ -52,10 +53,10 @@ while(True):
     for i in range(nPart):
         #calucalte the coordinates of a square with the particle at the center
         
-        xl = x[i]-extra_area
-        xr = x[i]+extra_area
-        yd = y[i]-extra_area
-        yu = y[i]+extra_area
+        xl = x[i]-w[i]
+        xr = x[i]+w[i]
+        yd = y[i]-w[i]
+        yu = y[i]+w[i]
         
         #transform this square to 64x64
         pts1 = np.float32([[xl,yd],[xr,yd],[xl,yu],[xr,yu]])
@@ -76,8 +77,8 @@ while(True):
     for i, weight in enumerate(weights):
         # do not know why x and y are switched but it seems like they are in
         # the right places in the video
-        cv2.rectangle(frame,(int(x[i] - extra_area),int(y[i] - extra_area)),
-                      (int(x[i] + extra_area), int(y[i] + extra_area)),
+        cv2.rectangle(frame,(int(x[i] - w[i]),int(y[i] - w[i])),
+                      (int(x[i] + w[i]), int(y[i] + w[i])),
                       (0,0, int(weight * 255)), 1)
 
     
@@ -92,12 +93,14 @@ while(True):
     #update particles
     x = np.asarray([x[i] for i in sampleInds])
     y = np.asarray([y[i] for i in sampleInds])
+    w = np.asarray([w[i] for i in sampleInds])
     
     #predict step, only movement now is noise
-    x,y = f.predict(x,y,R)
+    x, y, w = f.predict(x, y, w, R)
 
-    x = np.clip(x, extra_area, width - extra_area)
-    y = np.clip(y, extra_area, height - extra_area)
+    w = np.clip(y, 10, 32)
+    x = np.clip(x, w, width - w)
+    y = np.clip(y, w, height - w)
     
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break

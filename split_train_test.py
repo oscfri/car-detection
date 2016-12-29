@@ -30,12 +30,12 @@ if __name__ == "__main__":
         'non-vehicles/Left',
         'non-vehicles/MiddleClose',
         'non-vehicles/Right',
-        #'non-vehicles/Set1Part1',
+        'non-vehicles/Set1Part1',
         'vehicles/Far',
         'vehicles/Left',
         'vehicles/MiddleClose',
         'vehicles/Right',
-        #'vehicles/cars128x128',
+        'vehicles/cars128x128',
     ]
 
     for subfolder in subfolders:
