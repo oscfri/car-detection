@@ -18,8 +18,8 @@ nrandPart = 100
 # Points that the particle images will be normalized to
 pts2 = np.float32([[0,0],[63,0],[0,63],[63,63]])
 
-# Capture first frame                                                               \
-                                                                                         
+# Capture first frame
+
 ret, frame = cap.read()
 # Our operations on the frame come here
 height, width, channels = frame.shape
