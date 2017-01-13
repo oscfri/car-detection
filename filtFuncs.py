@@ -26,7 +26,7 @@ def default(width, height, size=1):
 
 def window_is_acceptable(x, y, w, width, height, illegal_windows):
     # Check if the particle is inside the image boundaries
-    if w < 5 or w > 32 or x < w or x > width - w or y < w or y > height - w:
+    if w < 5 or w > 64 or x < w or x > width - w or y < w or y > height - w:
         return False
     # Check if the particle collides with an illegal window
     for x1, y1, w1 in illegal_windows:

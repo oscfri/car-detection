@@ -40,6 +40,7 @@ frame_skip = 0
 
 while(True):
     frame_index += 1
+    print frame_index
     # Capture frame-by-frame                                                                                       
     ret, frame = cap.read()
     if frame_index < frame_skip:
@@ -104,7 +105,13 @@ while(True):
     w = np.concatenate((w,np.asarray(np.random.randint(10,64,size=nrandPart))),axis=0)
     #predict step, only movement now is noise
     
-    x,y,w = f.predict(x,y,w,R)
+    x,y,w = f.predict(x,y,w,R, width, height, [])
+    if frame_index == 20:
+        cv2.imwrite('videoRandom_20.png', frame)
+    if frame_index == 90:
+        cv2.imwrite('videoRandom_90.png', frame)
+    if frame_index == 150:
+        cv2.imwrite('videoRandom_150.png', frame)
 
     w = np.clip(w, 10, 64)
     x = np.clip(x, w, width - w)

@@ -12,7 +12,7 @@ model = load_model("car_model.h5")
 cap = cv2.VideoCapture('../road.mp4')
 
 # Set number of particles
-nPart = 50
+nPart = 75
 maxFilters = 5
 # Points that the particle images will be normalized to
 pts2 = np.float32([[0,0],[63,0],[0,63],[63,63]])
@@ -26,7 +26,7 @@ height, width, channels = frame.shape
 #extra_area determines how large of a square we will have around the particle, and extra_area of 100 would make a 200 by 200 square
 extra_area = 10
 # generate x, y coordinates for the particles
-w = [np.random.randint(5, 32, size=nPart)]
+w = [np.random.randint(5, 64, size=nPart)]
 x = [np.random.randint(extra_area,width-extra_area, size=nPart)]
 y = [np.random.randint(extra_area,height-extra_area, size=nPart)]
 illegal_windows = [(None, None, None)]
@@ -71,6 +71,7 @@ def measure(x, y, w):
 add_new = True
 while(True):
     frame_index += 1
+    print frame_index
     # Capture frame-by-frame
     ret, frame = cap.read()
     if frame_index < frame_skip:
@@ -87,7 +88,7 @@ while(True):
     
     # Add new filter
     if add_new and len(x) < maxFilters:
-        w.append(np.random.randint(5, 32, size=nPart))
+        w.append(np.random.randint(5, 64, size=nPart))
         x.append(np.random.randint(extra_area,width-extra_area, size=nPart))
         y.append(np.random.randint(extra_area,height-extra_area, size=nPart))
         illegal_windows.append((None, None, None))
@@ -109,7 +110,7 @@ while(True):
         if np.std(x[j]) < w_mean * 2 and np.std(y[j]) < w_mean * 2:
             # Illegal windows, as in windows that no other filter should look
             # into (because this window is already occupied by this filter)
-            illegal_windows[j] = (np.mean(x[j]), np.mean(y[j]), w_mean * 2)
+            illegal_windows[j] = (np.mean(x[j]), np.mean(y[j]), w_mean)
             # We want to remove this filter if the filter is too focused on
             # a weak area
             if sum(weights) < nPart * 0.1:
@@ -119,6 +120,7 @@ while(True):
         else:
             # This filter doesn't focus on a specific area. Bad to define
             # an illegal window
+            add_new = False
             illegal_windows[j] = (None, None, None)
         weights = weights / sum(weights)
         #resample
@@ -144,6 +146,12 @@ while(True):
         illegal_windows.pop(j - i)
 
     cv2.imshow('frame',frame)
+    if frame_index == 20:
+        cv2.imwrite('video_20.png', frame)
+    if frame_index == 90:
+        cv2.imwrite('video_90.png', frame)
+    if frame_index == 150:
+        cv2.imwrite('video_150.png', frame)
     
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
